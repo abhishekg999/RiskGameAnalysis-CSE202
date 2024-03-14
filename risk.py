@@ -180,7 +180,7 @@ def SubsetSumReduction(s: List[int], t: int):
     P = [0, 1]
     
     # Each troop "defeated" worths 2 * (territory bonus + 1)
-    scale = 2 * (TerritoryBonus(len(V)) + 1)
+    scale = (TerritoryBonus(len(V)) + 1)
 
     CB = [0] + [v * scale for v in s]
     gi = GameInstance(G, C, P, CB)
@@ -196,10 +196,21 @@ def SubsetSumReduction(s: List[int], t: int):
     return ans
 
 
+def random_subset(s):
+    return {x for x in s if random.choice((True, False))}
+
+
+def generate_test_case(max_set_size=7, max_target=7):
+    set_size = random.randint(1, max_set_size)
+    full_set = [random.randint(1, max_target) for _ in range(set_size)]
+    subset = random_subset(full_set)
+    target = sum(subset)
+    return (full_set, target)
+
 
 if __name__ == "__main__":
-    s = [3, 34, 4, 12, 5, 2]
-    t = 9
-
+    s, t = generate_test_case()
+    print(s, t)
     ans = SubsetSumReduction(s, t)
     print(ans)
+    assert sum(ans) == t
