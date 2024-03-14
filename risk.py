@@ -40,13 +40,13 @@ Armies: list representing number of armies in each territory
 class GameState(NamedTuple):
     TerritoryOwner: List[int]
     Armies: List[int]
-# GameState = namedtuple('GameState', ['TerritoryOwner', 'Armies'])
 
 class GameInstance(NamedTuple):
     G: Graph
     C: List[Set[int]]
     P: List[int]
-# GameInstance = namedtuple('GameInstance', ['G', 'C', 'P'])
+    ContinentBonus: List[int]
+
 
 
 """
@@ -92,12 +92,14 @@ def TerritoryToContinent(instance: GameInstance, v: int) -> int:
 @InternalGameFunction
 def DeterministicAttack(A: int, D: int) -> Tuple[int, int]:
     L = min(A - 2, D)
-    return (A - L, D - L)
+    A_p = A - L
+    D_p = D - L
+    # print(f"Attack: ({A}, {D}) -> ({A_p}, {D_p})")
+    return (A_p, D_p)
 
 @InternalGameFunction
 def ContinentBonus(instance: GameInstance, continent: int) -> int:
-    _ContinentBonus = [100 for _ in instance.C]
-    return _ContinentBonus[continent]
+    return instance.ContinentBonus[continent]
 
 @InternalGameFunction
 def TerritoryBonus(count: int) -> int:
@@ -150,6 +152,7 @@ def _1CnTAttacker(instance: GameInstance, state: GameState, p: int) -> int:
                 for w in instance.G.neighbors(v):
                     if state.TerritoryOwner[w] != p:
                         A_p, D_p = DeterministicAttack(state.Armies[v], state.Armies[w])
+                        # print(A_p, D_p)
                         if D_p == 0:
                             # If the attack will succeed, try moving all possible armies
                             _c = A_p
@@ -158,39 +161,45 @@ def _1CnTAttacker(instance: GameInstance, state: GameState, p: int) -> int:
                                 _attacks = attacks + [(v, w, c)]
                                 stack.append((newState, _attacks))
                         else:
-                            assert A_p == 1
+                            assert A_p <= 2
                             newState = Apply(instance, state, (v, w, 0))
                             _attacks = attacks + [(v, w, 0)]
-                            stack.append((state, _attacks))
+                            stack.append((newState, _attacks))
     return best
 
 
-def SubsetSumReduction(s: Set[int], t: int):
+def SubsetSumReduction(s: List[int], t: int):
     """
     Reduction from SubsetSum to 1CnT.
     """
 
+    V = list(range(len(s) + 1))
+    E = [(0, w) for w in V[1:]]
+    G = Graph(V, E)
+    C = [{s} for s in V]
+    P = [0, 1]
+    
+    # Each troop "defeated" worths 2 * (territory bonus + 1)
+    scale = 2 * (TerritoryBonus(len(V)) + 1)
 
+    CB = [0] + [v * scale for v in s]
+    gi = GameInstance(G, C, P, CB)
 
+    TO = [0] + [1] * len(s)
+    A = [2*t + 1] + [2*v - 1 for v in s] 
+    gs = GameState(TO, A)
+
+    _, moves = _1CnTAttacker(gi, gs, 0)
+    ans = []
+    for m in moves[:-1]:
+        ans.append(s[m[1] - 1])
+    return ans
 
 
 
 if __name__ == "__main__":
-    # Risk instance
-    V = [0, 1, 2, 3]
-    E = [(0, 1), (0, 2), (0, 3)]
-    G = Graph(V, E)
-    C = [{0}, {1}, {2}, {3}]
-    P = [0, 1]
-    gi = GameInstance(G, C, P)
-    gs = GameState([0, 1, 1, 1], [7, 1, 1, 1])    
+    s = [1, 1, 2]
+    t = 3
 
-    
-    bonus, moves = _1CnTAttacker(gi, gs, 0)
-    print(bonus, moves)
-    print("--------------------------------")
-    # apply moves
-    for move in moves:
-        gs = Apply(gi, gs, move)
-    
-    print(gs)
+    ans = SubsetSumReduction(s, t)
+    print(ans)
