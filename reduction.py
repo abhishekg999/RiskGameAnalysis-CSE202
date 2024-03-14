@@ -42,31 +42,48 @@ def HamiltonianPathReduction(G: Graph):
     """
     Reduction from HamiltonianPath to 1CMaxT.
     """
-
     g_map = {v: i + 1 for i, v in enumerate(G.V)}
     g_map_inv = {v: k for k, v in g_map.items()}
 
     V = list(range(len(G.V) + 1))
     E = [(g_map[u], g_map[v]) for u, v in G.E] + [(0, v) for v in V[1:]]
-    G = Graph(V, E)
+    Gp = Graph(V, E)
     C = [{v  for v in V}]
     P = [0, 1]
     CB = [0] + [1] * (len(V) - 1)
-    gi = GameInstance(G, C, P, CB)
+    gi = GameInstance(Gp, C, P, CB)
 
     TO = [0] + [1] * (len(V) - 1)
-    A = [len(V)**2] + [1] * (len(V) - 1)
+    A = [2*len(V) + 1] + [1] * (len(V) - 1)
     gs = GameState(TO, A)
 
     moves = Alg1CMaxTAttacker(gi, gs, 0)
-    return [g_map_inv[m[1]] for m in moves[:-1]]
+    path = [g_map_inv[m[1]] for m in moves[:-1]]
+    return path if len(path) == len(G.V) else None
 
 
 if __name__ == "__main__":
+    # Wikipedia Example: https://en.wikipedia.org/wiki/Hamiltonian_path
     V = range(6)
     E = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 4), (1, 5), (2, 5), (3, 4), (3, 5)]
     G = Graph(V, E)
-    
 
-    moves = HamiltonianPathReduction(G)
-    print(moves)
+    path = HamiltonianPathReduction(G)
+    print(path)
+
+    # Chair Graph
+    # 
+    #  O                 0
+    #  |
+    #  O --- O           1     2
+    #  |     |
+    #  O     O           3     4
+    #
+    V = range(5)
+    E = [(0, 1), (1, 2), (1, 3), (2, 4)]
+    G = Graph(V, E)
+
+    path = HamiltonianPathReduction(G)
+    print(path)
+
+    
