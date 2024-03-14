@@ -1,7 +1,9 @@
 from risk import *
 
+
 def random_subset(s):
     return {x for x in s if random.choice((True, False))}
+
 
 def generate_test_case(max_set_size=7, max_target=7):
     set_size = random.randint(1, max_set_size)
@@ -9,6 +11,7 @@ def generate_test_case(max_set_size=7, max_target=7):
     subset = random_subset(full_set)
     target = sum(subset)
     return (full_set, target)
+
 
 def SubsetSumReduction(s: List[int], t: int):
     """
@@ -20,15 +23,15 @@ def SubsetSumReduction(s: List[int], t: int):
     G = Graph(V, E)
     C = [{s} for s in V]
     P = [0, 1]
-    
+
     # Each troop "defeated" worths 2 * (territory bonus + 1)
-    scale = (TerritoryBonus(len(V)) + 1)
+    scale = TerritoryBonus(len(V)) + 1
 
     CB = [0] + [v * scale for v in s]
     gi = GameInstance(G, C, P, CB)
 
     TO = [0] + [1] * len(s)
-    A = [2*t + 1] + [2*v - 1 for v in s] 
+    A = [2 * t + 1] + [2 * v - 1 for v in s]
     gs = GameState(TO, A)
 
     moves = Alg1CnTAttacker(gi, gs, 0)
@@ -48,13 +51,13 @@ def HamiltonianPathReduction(G: Graph):
     V = list(range(len(G.V) + 1))
     E = [(g_map[u], g_map[v]) for u, v in G.E] + [(0, v) for v in V[1:]]
     Gp = Graph(V, E)
-    C = [{v  for v in V}]
+    C = [{v for v in V}]
     P = [0, 1]
     CB = [0] + [1] * (len(V) - 1)
     gi = GameInstance(Gp, C, P, CB)
 
     TO = [0] + [1] * (len(V) - 1)
-    A = [2*len(V) + 1] + [1] * (len(V) - 1)
+    A = [2 * len(V) + 1] + [1] * (len(V) - 1)
     gs = GameState(TO, A)
 
     moves = Alg1CMaxTAttacker(gi, gs, 0)
@@ -72,7 +75,7 @@ if __name__ == "__main__":
     print(path)
 
     # Chair Graph
-    # 
+    #
     #  O                 0
     #  |
     #  O --- O           1     2
@@ -85,5 +88,3 @@ if __name__ == "__main__":
 
     path = HamiltonianPathReduction(G)
     print(path)
-
-    
