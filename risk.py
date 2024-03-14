@@ -22,7 +22,7 @@ class Graph:
         return f"Graph(V={self.V}, E={self.E})"
 
     def neighbors(self, v: int) -> List[int]:
-        return [w for u, w in self.E if u == v]
+        return set([w for u, w in self.E if u == v] + [u for u, w in self.E if w == v])
 
 """
 GameState = (G, C, P, Players, Armies)
@@ -123,7 +123,50 @@ def objective(instance: GameInstance, state: GameState, p: int) -> int:
     return territory_bonus + continent_bonus
 
 
-def _1CnTAttacker(instance: GameInstance, state: GameState, p: int) -> int:
+
+def Alg1CMaxTAttacker(instance: GameInstance, state: GameState, p: int) -> int:
+    """
+    Trivial MaxTAttacker algorithm for 1CMaxT.
+    """
+
+    stack = []
+    attacks = []
+
+    stack.append((state, attacks))
+    best = (-1, None)
+    while stack:
+        state, attacks = stack.pop()
+
+        if attacks and attacks[-1] is None:
+            # check if we have a new best
+            value = objective(instance, state, p)
+            if value > best[0]:
+                best = (value, attacks)
+            continue
+        
+        # Try stopping here
+        stack.append((state, attacks + [None]))
+
+        # Or continue attacking
+        for v, player in enumerate(state.TerritoryOwner):
+            if player == p and state.Armies[v] > 2:
+                for w in instance.G.neighbors(v):
+                    if state.TerritoryOwner[w] != p:
+                        A_p, D_p = DeterministicAttack(state.Armies[v], state.Armies[w])
+                        if D_p == 0:
+                            c = A_p - 1
+                            newState = Apply(instance, state, (v, w, c))
+                            _attacks = attacks + [(v, w, c)]
+                            stack.append((newState, _attacks))
+                        else:
+                            assert A_p <= 2
+                            newState = Apply(instance, state, (v, w, 0))
+                            _attacks = attacks + [(v, w, 0)]
+                            stack.append((newState, _attacks))
+    return best[1]
+
+
+def Alg1CnTAttacker(instance: GameInstance, state: GameState, p: int) -> int:
     """
     Trivial MaxTAttacker algorithm for 1CnT.
     """
@@ -165,52 +208,7 @@ def _1CnTAttacker(instance: GameInstance, state: GameState, p: int) -> int:
                             newState = Apply(instance, state, (v, w, 0))
                             _attacks = attacks + [(v, w, 0)]
                             stack.append((newState, _attacks))
-    return best
+    return best[1]
 
 
-def SubsetSumReduction(s: List[int], t: int):
-    """
-    Reduction from SubsetSum to 1CnT.
-    """
 
-    V = list(range(len(s) + 1))
-    E = [(0, w) for w in V[1:]]
-    G = Graph(V, E)
-    C = [{s} for s in V]
-    P = [0, 1]
-    
-    # Each troop "defeated" worths 2 * (territory bonus + 1)
-    scale = (TerritoryBonus(len(V)) + 1)
-
-    CB = [0] + [v * scale for v in s]
-    gi = GameInstance(G, C, P, CB)
-
-    TO = [0] + [1] * len(s)
-    A = [2*t + 1] + [2*v - 1 for v in s] 
-    gs = GameState(TO, A)
-
-    _, moves = _1CnTAttacker(gi, gs, 0)
-    ans = []
-    for m in moves[:-1]:
-        ans.append(s[m[1] - 1])
-    return ans
-
-
-def random_subset(s):
-    return {x for x in s if random.choice((True, False))}
-
-
-def generate_test_case(max_set_size=7, max_target=7):
-    set_size = random.randint(1, max_set_size)
-    full_set = [random.randint(1, max_target) for _ in range(set_size)]
-    subset = random_subset(full_set)
-    target = sum(subset)
-    return (full_set, target)
-
-
-if __name__ == "__main__":
-    s, t = generate_test_case()
-    print(s, t)
-    ans = SubsetSumReduction(s, t)
-    print(ans)
-    assert sum(ans) == t
