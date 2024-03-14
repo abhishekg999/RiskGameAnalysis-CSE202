@@ -198,8 +198,8 @@ def SubsetSumReduction(s: List[int], t: int):
 
 
 if __name__ == "__main__":
-    s = [1, 1, 2]
-    t = 3
+    s = [3, 34, 4, 12, 5, 2]
+    t = 9
 
     ans = SubsetSumReduction(s, t)
     print(ans)
