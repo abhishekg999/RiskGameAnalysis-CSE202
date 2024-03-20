@@ -88,3 +88,11 @@ if __name__ == "__main__":
 
     path = HamiltonianPathReduction(G)
     print(path)
+
+    V = range(5)
+    E = [(0, 2),(0,3),(0,4),(1,2),(1,4),(2,3),(2,4)]
+    G = Graph(V, E)
+
+    path = HamiltonianPathReduction(G)
+    print(path)
+
