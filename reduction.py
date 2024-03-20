@@ -53,7 +53,7 @@ def HamiltonianPathReduction(G: Graph):
     Gp = Graph(V, E)
     C = [{v for v in V}]
     P = [0, 1]
-    CB = [0] + [1] * (len(V) - 1)
+    CB = [1]
     gi = GameInstance(Gp, C, P, CB)
 
     TO = [0] + [1] * (len(V) - 1)
@@ -66,28 +66,28 @@ def HamiltonianPathReduction(G: Graph):
 
 
 if __name__ == "__main__":
-    # Wikipedia Example: https://en.wikipedia.org/wiki/Hamiltonian_path
-    V = range(6)
-    E = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 4), (1, 5), (2, 5), (3, 4), (3, 5)]
-    G = Graph(V, E)
+    # # Wikipedia Example: https://en.wikipedia.org/wiki/Hamiltonian_path
+    # V = range(6)
+    # E = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 4), (1, 5), (2, 5), (3, 4), (3, 5)]
+    # G = Graph(V, E)
 
-    path = HamiltonianPathReduction(G)
-    print(path)
+    # path = HamiltonianPathReduction(G)
+    # print(path)
 
-    # Chair Graph
-    #
-    #  O                 0
-    #  |
-    #  O --- O           1     2
-    #  |     |
-    #  O     O           3     4
-    #
-    V = range(5)
-    E = [(0, 1), (1, 2), (1, 3), (2, 4)]
-    G = Graph(V, E)
+    # # Chair Graph
+    # #
+    # #  O                 0
+    # #  |
+    # #  O --- O           1     2
+    # #  |     |
+    # #  O     O           3     4
+    # #
+    # V = range(5)
+    # E = [(0, 1), (1, 2), (1, 3), (2, 4)]
+    # G = Graph(V, E)
 
-    path = HamiltonianPathReduction(G)
-    print(path)
+    # path = HamiltonianPathReduction(G)
+    # print(path)
 
     V = range(5)
     E = [(0, 2),(0,3),(0,4),(1,2),(1,4),(2,3),(2,4)]

@@ -114,12 +114,13 @@ def objective(instance: GameInstance, state: GameState, p: int) -> int:
 	# Territory bonuses
 	territories_owned = sum([1 for i in state.TerritoryOwner if i == p])
 	territory_bonus = TerritoryBonus(territories_owned)
-
+	
 	# Continent bonuses
 	continent_bonus = 0
 	for i, continent in enumerate(instance.C):
 		if all([state.TerritoryOwner[j] == p for j in continent]):
 			continent_bonus += ContinentBonus(instance, i)
+	
 	return territory_bonus + continent_bonus
 
 @InternalGameFunction
